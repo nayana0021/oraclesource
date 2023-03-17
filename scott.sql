@@ -90,4 +90,4 @@ SELECT
     job             "직 책",
     sal * 12 + comm annsal
 FROM
-    emp;
+    emp; 
