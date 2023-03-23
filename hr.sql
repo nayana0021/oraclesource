@@ -384,6 +384,8 @@ WHERE
 -- 부서번호, 이름(first_name과 last_name 연결하기), salary, hire_date 조회
 -- employees self join
 
+
+
 SELECT DISTINCT
     e1.department_id,
     e1.first_name
@@ -402,20 +404,39 @@ WHERE
     
 -- 서브쿼리
 -- LAST_NAME 에 u가 포함된 사원들과 동일 부서에 근무하는 사원들의 사번, last_name 조회
-
-
-
+select 
+    employee_id,
+    last_name
+from
+    employees e1
+where e1.department_id in ( select distinct department_id from employees where last_name like '%u%')
+order by e1.employee_id;
+    
 -- job_id 가 SA_MAN 인 사원들의 최대 연봉보다 높게 받은 사원들의 last_name, job_id, salary 조회
-
+select last_name, job_id, salary from employees where salary >
+(select max(salary) from employees where job_id = 'SA_MAN');
 -- 커미션을 버는 사원들의 부서와 연봉이 동일한 사원들의 last_name, deparment_id, salary 조회
-
+select last_name, department_id, salary
+from employees
+where(department_id, salary)
+in (select department_id, salary
+from employees where commission_pct>0);
 -- 회사 전체 평균 연봉보다 더 받는 사원들 중 last_name 에 u가 있는 사원들이 근무하는 부서에서
 -- 근무하는 사원들의 employee_id, last_name, salary 조회
-
+select employee_id, last_name, salary
+from (
+    select distinct department_id
+    from employees
+    where salary > (select round(avg(salary),0) from employees) and last_name like '%u%') dept, employees e
+    where e.department_id = dept.department_id
+    order by employee_id;
 
 -- last_name 이 Davies 인 사람보다 나중에 고용된 사원들의 last_name, hire_date 조회
-
+select last_name, hire_date from employees where hire_date >
+(select hire_date from employees where LAST_NAME='Davies') order by hire_date;
 -- last_name 이 King 인 사원을 매니저로 두고 있는 모든 사원들의 last_name, salary 조회
+select last_name, salary from employees
+where manager_id in (select emploee_id from employees where last_name='King'); -- 매니저번호와 사번이 일치 // 여러며이 나올수있어서 in을 사용함
 
 
 
