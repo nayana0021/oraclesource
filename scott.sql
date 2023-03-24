@@ -1420,7 +1420,7 @@ SELECT
     d.loc
 FROM
          emp e
-    JOIN dept d ON e.deptno = d.deptno; -- om 에 기준을 넣는다
+    JOIN dept d ON e.deptno = d.deptno; -- on 에 기준을 넣는다
 
 SELECT
     e.empno,
@@ -2404,7 +2404,7 @@ FROM
     
 COMMIT;
 
--- 테이블을 처음 만들 때 null 값이 들어갈수있게 만들면 insert 시 null 을 읿력할수있다
+-- 테이블을 처음 만들 때 null 값이 들어갈수있게 만들면 insert 시 null 을 입력할수있다
 
 -- UPDATE : 테이블에 있는 데이터 수정
 

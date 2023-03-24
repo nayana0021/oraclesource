@@ -436,7 +436,7 @@ select last_name, hire_date from employees where hire_date >
 (select hire_date from employees where LAST_NAME='Davies') order by hire_date;
 -- last_name 이 King 인 사원을 매니저로 두고 있는 모든 사원들의 last_name, salary 조회
 select last_name, salary from employees
-where manager_id in (select emploee_id from employees where last_name='King'); -- 매니저번호와 사번이 일치 // 여러며이 나올수있어서 in을 사용함
+where manager_id in (select employee_id from employees where last_name='King'); -- 매니저번호와 사번이 일치 // 여러명이 나올수있어서 in을 사용함
 
 
 
