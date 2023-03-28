@@ -2181,7 +2181,7 @@ WHERE
 ORDER BY
     e.empno;
 
--- DML( Date Manipulation Language ) : 데이터 추가(INSERT), 수정(UPDATE), 삭제(DELETE)하는 데이터 조작어
+-- DML( Data Manipulation Language ) : 데이터 추가(INSERT), 수정(UPDATE), 삭제(DELETE)하는 데이터 조작어
 -- COMMIT : DML 작업을 데이터베이스에 최종 반영
 -- ROLLBACK :DML 작업을 취소
 -- select + DML ==> 자주 사용하는 sql 임
@@ -2379,7 +2379,7 @@ INSERT INTO emp_temp (
     sal,
     comm,
     deptno
-) --INSERT 시 컬림의 열 맞춰야 함 (select에 * 입력하면 에러남)
+) --INSERT 시 컬럼의 열 맞춰야 함 (select에 * 입력하면 에러남)
     SELECT
         e.empno,
         e.ename,
@@ -3338,5 +3338,6 @@ insert into table_default values('TEST', null, '010-1234-5678');
 insert into table_default(login_id, tel) values('TEST1', '010-1234-5678');
 select * from table_default;
 
+commit;
 
 
