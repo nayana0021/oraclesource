@@ -67,8 +67,51 @@ create sequence product_seq;
 create table sorder(
             order_id number(8) primary key,
             user_id number(4) not null REFERENCES suser(user_id),
-            product_id number(8)  not null REFERENCES product(product_id));
+            product_id number(8)  not null REFERENCES product(product_id)
+            );
 
+ALTER TABLE sorder ADD order_date DATE;     -- 구매날짜
 
 create sequence order_seq;
+
+--insert into order values(order_seq.nextval,물건을 구매한 id, 상품 id, sysdate); -- 장바구니로 이용
+
+select * from sorder;
+
+
+-- user_id, name, pay_no, info
+-- suser와 paytype join
+select u.user_id, u.name, u.pay_no, p.info
+from suser u, paytype p
+where u.pay_no = p.pay_no AND u.user_id=1000;
+
+-- 주문정보 전체 조회
+select * from sorder;
+
+-- 주문목록 조회
+-- user_id, name, card/cash, product_id, pname, price, content
+
+-- 기준 : sorder
+-- suser 테이블 : name,
+-- paytype 테이블 : card/cash
+-- product 테이블 : product_id, pname, price, content
+
+-- 전체 주문목록
+select s.user_id, u.name, t.info, s.product_id, p.pname, p.price, p.content, s.order_date
+from sorder s, suser u, paytype t, product p
+where s.user_id = u.user_id AND u.pay_no = t.pay_no AND s.product_id = p.product_id;
+
+-- 홍길동 주문목록 조회
+select s.user_id, u.name, t.info, s.product_id, p.pname, p.price, p.content, s.order_date
+from sorder s, suser u, paytype t, product p
+where s.user_id = u.user_id AND u.pay_no = t.pay_no AND s.product_id = p.product_id AND s.user_id = 1000;
+
+
+--select s.user_id, s.name, t.pay_no, p.product_id, p.price, p.content
+--from sorder s, suser u, paytype t, product p
+--where u.paytype = t.paytype and s.product_id = p.product_id and 
+
+
+
+
 
