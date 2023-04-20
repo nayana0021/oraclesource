@@ -12,6 +12,32 @@ create table userTBL(
 
 drop table userTBL;
 
+-- select(+서브쿼리,조인) + DML(insert, delete, update) 구문이 엄청 중요하다
+-- 전체조회
+select * from usertbl;
+--개별조회(특정번호, 특정이름...)
+--여러행이 나오는 상태냐? 하나의 행이 결과로 나올것이냐?(where 절과 관련) pk가 아닌 이상 여러개가 나올수있음
+select * from usertbl where no=1; --pk로 만들면 결과 하나로 나온다!!
+select * from usertbl where username='홍길동'; --동명이인이 있어서 중복이 가능..
+
+-- like : _ or % 여러행이 결과로 나올때 사용
+select * from usertbl where username like '_길동%'; -- 앞에 한자리 뒤에 상관없음
+
+--insert into 테이블명(필드명1, 필드명2...)
+--values();
+
+--update 테이블명
+--set 업데이트할 필드명=값, 업데이트할 필드명=값,....
+--where 조건;
+
+--delete 테이블명 where 조건
+
+--delete from 테이블명 where 조건
+
+
+
+
+
 -- 시퀀스 생성
 -- user_seq 생성(기본)
 create sequence user_seq;
