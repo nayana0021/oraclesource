@@ -3,25 +3,45 @@
 -- user TBL 테이블 생성
 -- no(번호-숫자(4)), username(이름-한글(4)), birthyear(년도-숫자(4)), addr(주소-문자(한글,숫자)), mobile(010-1234-1234)
 -- no pk 제약조건 지정(제약조건명 pk_userTBL)
-create table userTBL(
-            no number(4) constraint pk_userTBL primary key,
-            username nvarchar2(10) not null,    -- varchar2(20) 가능
-            birthyear number(4) not null,
-            addr nvarchar2(50) not null,        -- varchar2(50) 가능
-            mobile nvarchar2(20));              -- varchar2(20) 가능
+CREATE TABLE usertbl (
+    no        NUMBER(4)
+        CONSTRAINT pk_usertbl PRIMARY KEY,
+    username  NVARCHAR2(10) NOT NULL,    -- varchar2(20) 가능
+    birthyear NUMBER(4) NOT NULL,
+    addr      NVARCHAR2(50) NOT NULL,        -- varchar2(50) 가능
+    mobile    NVARCHAR2(20)
+);              -- varchar2(20) 가능
 
-drop table userTBL;
+DROP TABLE usertbl;
 
 -- select(+서브쿼리,조인) + DML(insert, delete, update) 구문이 엄청 중요하다
 -- 전체조회
-select * from usertbl;
+SELECT
+    *
+FROM
+    usertbl;
 --개별조회(특정번호, 특정이름...)
 --여러행이 나오는 상태냐? 하나의 행이 결과로 나올것이냐?(where 절과 관련) pk가 아닌 이상 여러개가 나올수있음
-select * from usertbl where no=1; --pk로 만들면 결과 하나로 나온다!!
-select * from usertbl where username='홍길동'; --동명이인이 있어서 중복이 가능..
+SELECT
+    *
+FROM
+    usertbl
+WHERE
+    no = 1; --pk로 만들면 결과 하나로 나온다!!
+SELECT
+    *
+FROM
+    usertbl
+WHERE
+    username = '홍길동'; --동명이인이 있어서 중복이 가능..
 
 -- like : _ or % 여러행이 결과로 나올때 사용
-select * from usertbl where username like '_길동%'; -- 앞에 한자리 뒤에 상관없음
+SELECT
+    *
+FROM
+    usertbl
+WHERE
+    username LIKE '_길동%'; -- 앞에 한자리 뒤에 상관없음
 
 --insert into 테이블명(필드명1, 필드명2...)
 --values();
@@ -36,44 +56,68 @@ select * from usertbl where username like '_길동%'; -- 앞에 한자리 뒤에
 
 
 
-
-
 -- 시퀀스 생성
 -- user_seq 생성(기본)
-create sequence user_seq;
+CREATE SEQUENCE user_seq;
 
 -- insert
 -- no : user_seq 값 넣기
-insert into userTBL(no, username, birthyear, addr, mobile)
-values(user_seq.nextval ,'홍길동',2010,'서울시 종로구 123','010-1234-5678');
+INSERT INTO usertbl (
+    no,
+    username,
+    birthyear,
+    addr,
+    mobile
+) VALUES (
+    user_seq.NEXTVAL,
+    '홍길동',
+    2010,
+    '서울시 종로구 123',
+    '010-1234-5678'
+);
 
-select * from userTBL;
+SELECT
+    *
+FROM
+    usertbl;
 
-commit;
+COMMIT;
 
 -- 모든 컬럼 not null
 
 -- paytype : pay_no(숫자-1 pk), info(문자-card, cash)
 -- paytype_seq 생성
-create table paytype(
-            pay_no number(1) primary key,
-            info varchar2(10) not null);
+CREATE TABLE paytype (
+    pay_no NUMBER(1) PRIMARY KEY,
+    info   VARCHAR2(10) NOT NULL
+);
 
-create sequence paytype_seq;
+CREATE SEQUENCE paytype_seq;
 
-insert into paytype values(paytype_seq.nextval, 'card'); -- 부모에 해당하는 테이블이어서 데이터를 먼저 넣어줌
-insert into paytype values(paytype_seq.nextval, 'cash');
+INSERT INTO paytype VALUES (
+    paytype_seq.NEXTVAL,
+    'card'
+); -- 부모에 해당하는 테이블이어서 데이터를 먼저 넣어줌
+INSERT INTO paytype VALUES (
+    paytype_seq.NEXTVAL,
+    'cash'
+);
 
-select * from paytype; -- 1 : card, 2 : cash
+SELECT
+    *
+FROM
+    paytype; -- 1 : card, 2 : cash
 
 -- suser : user_id(숫자-4 pk), name(문자-한글), pay_no(숫자-1: paytype 테이블에 있는 pay-no 참조 해서 사용)
 
-create table suser(
-            user_id number(4) primary key,
-            name varchar2(20) not null,
-            pay_no number(1) not null REFERENCES paytype(pay_no));
+CREATE TABLE suser (
+    user_id NUMBER(4) PRIMARY KEY,
+    name    VARCHAR2(20) NOT NULL,
+    pay_no  NUMBER(1) NOT NULL
+        REFERENCES paytype ( pay_no )
+);
 
-drop table suers;
+DROP TABLE suers;
 -- product
 -- product_id(숫자-8 pk), pname(문자), price(숫자), content(문자)
 _
@@ -104,7 +148,6 @@ create sequence order_seq;
 
 select * from sorder;
 
-
 -- user_id, name, pay_no, info
 -- suser와 paytype join
 select u.user_id, u.name, u.pay_no, p.info
@@ -132,11 +175,9 @@ select s.user_id, u.name, t.info, s.product_id, p.pname, p.price, p.content, s.o
 from sorder s, suser u, paytype t, product p
 where s.user_id = u.user_id AND u.pay_no = t.pay_no AND s.product_id = p.product_id AND s.user_id = 1000;
 
-
 --select s.user_id, s.name, t.pay_no, p.product_id, p.price, p.content
 --from sorder s, suser u, paytype t, product p
 --where u.paytype = t.paytype and s.product_id = p.product_id and 
-
 
 
 -- 도서 테이블
@@ -166,7 +207,6 @@ commit;
 
 alter table booktbl add description nvarchar2(100);
 
-
 -- member 테이블 not null
 -- userid( 영어,숫자,특수문자) 최대 12 허용, pk
 -- password(영어,숫자,특수문자) 최대 15 허용
@@ -188,11 +228,9 @@ commit;
 -- 카운트 함수로 불러옴 결과값은 정수
 select count(*) from membertbl where userid='hok11@';
 
-
 -- 게시판 board
 -- 글번호(bno, 숫자, 시퀀스 삽입, pk(pk_board 제약조건명), 작성자(name,한글), 비밀번호(passowrd,숫자,영문자), 제목(title,한글), 내용(content,한글), 파일첨부(attach,파일명), 답변글 작성시 참조되는 글 번호(re_ref,숫자), 답변글 레벨(re_lev,숫자), 답변글 순서(re_seq,숫자)
 -- 조회수(cnt,숫자,default 0 지정), 작성날짜(redate, default 로 sysdate 지정) - 숫자8자리
-
 
 
 create table board(
@@ -210,7 +248,53 @@ create table board(
 );
     
 -- 시퀀스 생성 board_seq
-create sequence board_seq;
+CREATE SEQUENCE board_seq;
+
+UPDATE board
+SET
+    title = '',
+    content = ''
+WHERE
+        bno = 3
+    AND password = '12345';
+
+UPDATE board
+SET
+    title = '',
+    content = '',
+    attach = ''
+WHERE
+        bno = 3
+    AND password = '12345';
+
+-- 서브쿼리(쿼리 안에 쿼리 포함)
+
+INSERT INTO board (
+    bno,
+    name,
+    password,
+    title,
+    content,
+    re_ref,
+    re_lev,
+    re_seq
+)
+    (
+        SELECT
+            board_seq.NEXTVAL,
+            name,
+            password,
+            title,
+            content,
+            board_seq.CURRVAL,
+            re_lev,
+            re_seq
+        FROM
+            board
+    );
+
+COMMIT;
+
 
 
 
