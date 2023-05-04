@@ -229,7 +229,8 @@ commit;
 select count(*) from membertbl where userid='hok11@';
 
 -- 게시판 board
--- 글번호(bno, 숫자, 시퀀스 삽입, pk(pk_board 제약조건명), 작성자(name,한글), 비밀번호(passowrd,숫자,영문자), 제목(title,한글), 내용(content,한글), 파일첨부(attach,파일명), 답변글 작성시 참조되는 글 번호(re_ref,숫자), 답변글 레벨(re_lev,숫자), 답변글 순서(re_seq,숫자)
+-- 글번호(bno, 숫자, 시퀀스 삽입, pk(pk_board 제약조건명), 작성자(name,한글), 비밀번호(passowrd,숫자,영문자), 제목(title,한글), 내용(content,한글), 파일첨부(attach,파일명), 
+-- 답변글 작성시 참조되는 글 번호(re_ref,숫자), 답변글 레벨(re_lev,숫자), 답변글 순서(re_seq,숫자)
 -- 조회수(cnt,숫자,default 0 지정), 작성날짜(redate, default 로 sysdate 지정) - 숫자8자리
 
 
@@ -294,6 +295,127 @@ INSERT INTO board (
     );
 
 COMMIT;
+
+
+
+-- 댓글(계층형)
+-- re_ref, re_lev, re_seq 
+
+-- 원본글 작성 re_ref : bno 값과 동일
+--          re_lev : 0, re_seq : 0
+
+-- 원본글
+select bno, title, re_ref, re_lev, re_seq from board where bno = 2563;
+
+-- re_ref : 그룹번호, re_seq : 그룹 내에서 댓글의 순서(댓글도 최신순으로 보여줘야 함 - 순서가 필요함 그 작업을 위해 필요), 
+-- re_lev : 그룹 내에서 댓글의 깊이(원본글의 댓글인지? 댓글의 댓글인지?...대대댓글인지..?) 
+
+-- 댓글도 새글임 => insert 작업
+--              bno : board_seq.nextval (시퀀스 번호 발급 받아서 처리)
+--              re_ref : 원본글의 re_ref 값과 동일하게 삽입 (그룹잡기)
+--              re_seq : 원본글의 re_seq + 1
+--              re_lev : 원본글의 re_lev + 1
+
+
+-- 첫번재 댓글 작성
+insert into board(bno,name,password,title,content,attach,re_ref,re_lev,re_seq) 
+values(board_seq.nextval,'김댓글','12345','Re : 게시글','게시글 댓글',null,2563,1,1);
+
+commit;
+
+-- 가장 최신글과 댓글 가지고 오기(+ re_seq asc : 댓글의 최신) - 그룹으로 가져오기
+select bno, title, re_ref, re_lev, re_seq from board where re_ref=2563 order by re_seq;
+
+-- 두번째 댓글 작성
+-- re_seq 가 값이 작을수록 최신글임
+
+-- 기존 댓글이 있는가? 기존 댓글의 re_seq 변경을 한 후 insert 작업 해야 함
+
+-- update 구문에서 where 절은 re_ref 는 원본글(부모글)의 re_ref 값, re_seq 비교구문은 원본글의 re_seq 값과 비교 (부모글의 re_seq 보다 커야 함)
+
+update board set re_seq = re_seq + 1 where re_ref=2563 and re_seq > 0;
+
+commit;
+
+insert into board(bno,name,password,title,content,attach,re_ref,re_lev,re_seq) 
+values(board_seq.nextval,'김댓글','12345','Re : 게시글2','게시글 댓글2',null,2563,1,1);
+
+-- 댓글의 댓글 작성(대댓글)
+-- update -> insert 
+
+update board set re_seq = re_seq + 1 where re_ref=2563 and re_seq > 2;
+
+
+insert into board(bno,name,password,title,content,attach,re_ref,re_lev,re_seq) 
+values(board_seq.nextval,'김댓글','12345','ReRe : 게시글','댓글의 댓글',null,2563,2,3);
+
+
+-- 페이지 나누기
+-- rownum : 조회된 결과에 번호를 매겨줌
+--             order by 구문에 index 가 들어가지 않는다면 제대로 된 결과를 보장하지 않음 (index:색인) : 계층형에서는 rownum을 일반적으로 사용할 수 없다
+--              pk 가 index로 사용됨
+
+
+select rownum, bno, title from board order by bno desc;
+
+-- 이렇게하면 원하는 결과 안나옴
+select rownum, bno, title, re_ref, re_lev, re_seq 
+from board order by re_ref desc, re_seq asc;
+
+-- 해결
+-- order by 구문을 먼저 실행한 후 rownum 붙여야 함
+
+select rownum, bno, title, re_ref, re_lev, re_seq
+from (select bno, title, re_ref, re_lev, re_seq 
+      from board order by re_ref desc, re_seq asc)
+where rownum <= 30;
+
+-- 이렇게는 못함..
+select rownum, bno, title, re_ref, re_lev, re_seq
+from (select bno, title, re_ref, re_lev, re_seq 
+      from board order by re_ref desc, re_seq asc)
+where rownum >=31 and rownum <= 60;
+
+-- 한 페이지에 30개의 목록을 보여준다 할 때
+-- 1 2 3 4 5 6 ....
+-- 1page 요청 (1~30)
+-- 2page 요청 (31~60)
+-- 3page 요청 (61~90)
+
+select *
+from(select rownum rnum, bno, title, re_ref, re_lev, re_seq
+    from (select bno, title, re_ref, re_lev, re_seq 
+         from board order by re_ref desc, re_seq asc)
+    where rownum <= 90)
+where rnum > 60;
+-- 안쪽 부터 뽑아나오니 원래는 90개인데 보여주는게 30개임
+-- rownum 이름 rnum 으로 이름 붙임
+
+
+select *
+from(select rownum rnum, bno, title, re_ref, re_lev, re_seq
+    from (select bno, title, re_ref, re_lev, re_seq 
+         from board order by re_ref desc, re_seq asc)
+    where rownum <= ?)
+where rnum > ?;
+-- 1 page : rnum > 0, rownum <= 30
+-- 2 page : rnum > 30, rownum <= 60
+-- 3 page : rnum > 60, rownum <= 90
+
+-- 1,2,3 이용
+-- rownum 값 : 페이지 번호 * 한 페이지에 보여줄 목록 개수
+-- rnum 값 : (페이지번호-1) * 한 페이지에 보여줄 목록 개수
+
+
+select rownum, bno, title from board order by bno desc;
+-- 위에 구문이 안돼서 밑에 썜이 주신 코드임
+select /*+INDEX_DESC(board pk_board)*/ rownum, bno, title from board;
+
+
+
+
+
+
 
 
 
