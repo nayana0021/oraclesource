@@ -412,6 +412,52 @@ select rownum, bno, title from board order by bno desc;
 select /*+INDEX_DESC(board pk_board)*/ rownum, bno, title from board;
 
 
+-- book_mvc 연습 테이블 생성
+-- 도서 테이블
+-- code, title, writer, price
+-- code : 1001(pk)
+-- title : ‘자바의 신’ (varchar2 or nvarchar2 ==> 한글일때 varchar2:한글 3byte 처리, nvarchar2:한글 문자 갯수만큼 1byte)
+-- writer : ‘홍길동’
+-- price : 25000
+
+-- bookTBL 테이블 생성
+
+create table booktblys(
+    code number(4) primary key, -- not null+unique
+    title nvarchar2(50) not null,
+    writer nvarchar2(20) not null,
+    price number(8) not null);
+
+drop table booktblys;
+
+insert into booktblys(code, title,writer, price) values(1001, '이것이 자바다', '신용균', 25000);
+insert into booktblys(code, title,writer, price) values(1002, '자바의 신', '강신용', 28000);
+insert into booktblys(code, title,writer, price) values(1003, '오라클로 배우는 데이터베이스', '이지훈', 28000);
+insert into booktblys(code, title,writer, price) values(1004, '자바 1000제', '김용만', 29000);
+insert into booktblys(code, title,writer, price) values(1005, '자바 프로그래밍 입문', '박은종', 30000);
+
+commit;
+
+alter table booktblys add description nvarchar2(100);
+
+-- member_mvc 연습 테이블 생성
+-- member 테이블 not null
+-- userid( 영어,숫자,특수문자) 최대 12 허용, pk
+-- password(영어,숫자,특수문자) 최대 15 허용
+-- name(한글)
+-- gender(한글-남 or )여
+-- email 적절한 크기
+
+create table membertblys(
+    userid varchar2(15)  primary key,
+    password varchar2(20) not null,
+    name nvarchar2(10) not null,
+    gender nvarchar2(2) not null,
+    email varchar2(50) not null
+);
+
+insert into membertblys values('hong123', 'hong123@', '홍길동', '남', 'hong123@gmail.com');
+commit;
 
 
 
