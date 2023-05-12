@@ -461,13 +461,55 @@ commit;
 
 
 
+select count(*) from board;
+
+select count(*) from board where title like '%게시글%';
+
+
+
+----------------- spring_board
+-- bno 숫자(10) 제약조건 pk 제약조건명 pk_spring_board
+-- title varchar2(200) 제약조건 not null
+-- content varchar2(2000) 제약조건 not null
+-- writer varchar2(50) 제약조건 not null
+-- regdate date default 로 현재시스템날짜
+-- updatedate date default 로 현재시스템날짜
+create table spring_board(
+    bno number(10) constraint pk_spring_board primary key,
+    title varchar2(200) not null,
+    content varchar2(2000) not null,
+    writer varchar2(50) not null,
+    regdate date default sysdate,
+    updatedate date default  sysdate);
+
+-- 시퀀스 seq_board
+create sequence seq_board;
 
 
 
 
+-- my baits 연습용 테이블
+create table person(
+id varchar2(20) primary key,
+name varchar2(30) not null);
+
+select * from person;
+
+insert into person values('kang123', '강길동');
+insert into person values('kim123', '김길동');
+insert into person values('ko123', '고길동');
+insert into person values('choi123', '최길동');
+commit;
 
 
+-- 트랜잭션 테스트 테이블
+-- 트랜잭션 : 하나의 업무에 여러개의 작은 업무들이 같이 묶여 있음 / 하나의 단위로 처리
+-- 계좌이체 : 계좌 출금 => 타 계좌 입금
+create table tbl_sample1(col1 varchar2(500));
+create table tbl_sample2(col1 varchar2(50));
 
+select * from tbl_sample1;
+select * from tbl_sample2;
 
-
-
+delete tbl_sample1;
+commit;
