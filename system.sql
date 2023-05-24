@@ -109,7 +109,12 @@ TEMPORARY TABLESPACE TEMP;
 -- 권한부여(뷰나 시노님은 따로)
 GRANT CONNECT,RESOURCE TO test2;
 
-
+--명령의 568 행에서 시작하는 중 오류 발생 -
+--insert into spring_reply(rno,bno,reply,replyer) 
+--values(seq_reply.nextval, 1066, '게시판 댓글달기', '댓글작성자1')
+--오류 보고 -
+--ORA-01536: 'USERS' 테이블스페이스에 영역 할당량이 초과됐습니다
+alter user javadb quota unlimited on users;
 
 
 

@@ -513,3 +513,76 @@ select * from tbl_sample2;
 
 delete tbl_sample1;
 commit;
+
+
+-- membertbl password ==> 100 byte 로 변경 20230516
+alter table membertbl modify password varchar2(100);
+
+
+-- 페이지 나누기(GET 방식)
+-- rownum : 조회된 결과에 번호를 매겨줌
+-- spring_board : bno 가 pk 상황 (order by 기준도 bno)
+-- 1 page : 가장 최신글 20개
+-- 2 page : 그 다음 최신글 20개
+
+insert into spring_board(bno,title,content,writer)
+(select seq_board.nextval,title,content,writer from spring_board);
+
+commit;
+
+select count(*) from spring_board;
+
+-- 페이지 나누기를 할 때 필요한 sql 코드
+-- 로우넘을 붙이고 오더바이 작업을 할 수 있어서 그 부분을 주의해야함 (오더바이를 먼저하고 로우넘을 이용해서 번호를 매기고 필요한 부분을 가지고 나오는 코드)
+select *
+from(select rownum rn, bno,title,writer
+        from (select bno,title,writer from spring_board order by bno desc)
+        where rownum <= 20)
+where rn>0;
+
+
+-- 오라클 힌트 사용
+select bno,title,writer,regdate,updatedate
+from (select /*+INDEX_DESC(spring_board pk_spring_board)*/ rownum rn, bno,title,writer,regdate,updatedate
+        from spring_board
+        where rownum <= 40)
+where rn > 20;
+-- bno 가 pk 인 상황이라 마침 index 개념도 있어서 oracle hint 를 사용해서 간단하게 사용 가능
+
+select count (*) from spring_board;
+
+
+-- 댓글 테이블
+create table spring_reply(
+    rno number(10,0) constraint pk_reply primary key, -- 댓글 글번호
+    bno number(10,0) not null,                        -- 원본글 글번호
+    reply varchar2(1000) not null,                    -- 댓글 내용
+    replyer varchar2(50) not null,                    -- 댓글 작성자
+    replydate date default sysdate,                   -- 댓글 작성날짜
+    constraint fk_reply_board foreign key(bno) references spring_board(bno) -- 외래키 제약조건
+);
+
+-- 댓글 테이블 수정(컬럼추가) updatedate
+alter table spring_reply add updatedate date default sysdate; 
+
+create sequence seq_reply;
+
+-- 1066 글에 댓글달기
+insert into spring_reply(rno,bno,reply,replyer) 
+values(seq_reply.nextval, 1066, '게시판 댓달기', '댓1');
+commit;
+
+
+-- spring_reply 인덱스 추가 설정
+create index idx_reply on spring_reply(bno desc, rno asc);
+
+
+select rno, bno, reply, replyer, replydate, updatedate
+from (select /*+INDEX(spring_reply idx_reply)*/ rownum rn, rno, bno, reply, replyer, replydate, updatedate
+        from spring_reply
+        where bno=1066 and rownum <= 10)
+where rn > 0;
+
+
+
+
